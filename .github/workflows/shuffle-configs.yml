@@ -7,9 +7,12 @@ name: Shuffle Subscription Configs # نام Workflow که در تب "Actions" ن
 on:
   push:
     branches: [ main ] # این Workflow هنگام push به شاخه 'main' اجرا می‌شود
-  # می‌توانید به جای 'push' از 'schedule' برای اجرای زمان‌بندی شده استفاده کنید، مثلاً:
-  # schedule:
-  #   - cron: '0 0 * * *' # هر روز در نیمه‌شب اجرا می‌شود (UTC)
+  schedule:
+    # اجرا روزی دو بار به وقت تهران (UTC+3:30)
+    # 8:00 صبح تهران = 4:30 صبح UTC
+    - cron: '30 4 * * *'
+    # 8:00 شب تهران = 16:30 بعدازظهر UTC
+    - cron: '30 16 * * *'
   workflow_dispatch: # همچنان می‌توانید به صورت دستی نیز آن را اجرا کنید
 
 jobs:
