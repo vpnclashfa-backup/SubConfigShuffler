@@ -1,0 +1,38 @@
+# .github/workflows/shuffle-configs.yml
+# این Workflow گیت‌هاب اکشن را برای به‌هم‌ریختن و فیلتر کردن تنظیمات اشتراک تعریف می‌کند.
+# اکنون از پایتون برای اجرای منطق اصلی استفاده می‌کند.
+
+name: Shuffle Subscription Configs # نام Workflow که در تب "Actions" نمایش داده می‌شود
+
+on:
+  push:
+    branches: [ main ] # این Workflow هنگام push به شاخه 'main' اجرا می‌شود
+  # می‌توانید به جای 'push' از 'schedule' برای اجرای زمان‌بندی شده استفاده کنید، مثلاً:
+  # schedule:
+  #   - cron: '0 0 * * *' # هر روز در نیمه‌شب اجرا می‌شود (UTC)
+  workflow_dispatch: # همچنان می‌توانید به صورت دستی نیز آن را اجرا کنید
+
+jobs:
+  shuffle: # تعریف یک Job به نام 'shuffle'
+    runs-on: ubuntu-latest # این Job روی یک ماشین مجازی اوبونتو اجرا می‌شود
+    steps:
+      - name: Checkout repository # مرحله: دریافت کد مخزن
+        uses: actions/checkout@v4 # استفاده از اکشن رسمی برای دریافت کد
+
+      - name: Set up Python # مرحله: تنظیم پایتون
+        uses: actions/setup-python@v5 # استفاده از اکشن رسمی برای تنظیم پایتون
+        with:
+          python-version: '3.x' # تعیین آخرین نسخه پایتون 3
+
+      - name: Install dependencies # مرحله: نصب وابستگی‌ها
+        run: pip install -r requirements.txt # اجرای دستور pip install برای نصب پکیج‌های تعریف شده در requirements.txt
+
+      - name: Run Shuffle Script # مرحله: اجرای اسکریپت به‌هم‌ریختن
+        run: python main.py # اجرای اسکریپت main.py با پایتون
+
+      - name: Upload Shuffled Configs # مرحله: آپلود فایل خروجی به عنوان Artifact
+        uses: actions/upload-artifact@v4 # استفاده از اکشن رسمی برای آپلود Artifact
+        with:
+          name: shuffled-configs # نام Artifact
+          # مسیر پوشه خروجی را مشخص می‌کنیم تا تمام فایل‌های تولید شده آپلود شوند.
+          path: shuffled_outputs/ # مسیر پوشه خروجی
