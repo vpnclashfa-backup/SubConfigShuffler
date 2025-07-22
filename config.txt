@@ -4,6 +4,8 @@
 # مقادیر رشته‌ای نیازی به نقل قول ندارند.
 
 # تعداد نهایی تنظیماتی که باید از مجموع لیست‌ها انتخاب شوند
+# این تنظیم اکنون بیشتر به عنوان یک پیش‌فرض برای 'count_per_url' عمل می‌کند
+# اگر 'count_per_url' برای یک URL خاص مشخص نشود.
 # برای نامحدود بودن تعداد، عدد 0 را وارد کنید.
 GLOBAL_COUNT=300
 
@@ -12,22 +14,26 @@ GLOBAL_COUNT=300
 # Shadowsocks, ShadowsocksR, Mieru, Snell, VMess, VLESS, Trojan, AnyTLS, Hysteria, Hysteria2, TUIC, WireGuard, SSH
 GLOBAL_TYPE=ss,ssr,mieru,snell,vmess,vless,trojan,anytls,hysteria,hysteria2,tuic,wireguard,ssh
 
-# نام پوشه‌ای که فایل خروجی در آن ذخیره می‌شود
+# نام پوشه‌ای که فایل‌های خروجی در آن ذخیره می‌شوند
 OUTPUT_FOLDER=shuffled_outputs
 
-# نام فایل خروجی
-OUTPUT_FILE_NAME=shuffled_configs.txt
+# نام فایل خروجی پیش‌فرض برای URLهایی که نام فایل خاصی ندارند.
+# اگر برای هر URL نام فایل مشخص شود، این مقدار استفاده نخواهد شد.
+OUTPUT_FILE_NAME=combined_shuffled_configs.txt
 
 # لیست URLهای فایل تنظیمات اشتراک
 # هر URL در یک خط جداگانه قرار می‌گیرد.
 # برای هر URL می‌توانید تنظیمات خاصی را با کاما جدا کنید:
-# URL,type=ss,count_per_url=20
+# URL,type=ss,count_per_url=20,output_file_name=my_file.txt
 # اگر type یا count_per_url مشخص نشود، از تنظیمات سراسری استفاده می‌شود.
+# اگر output_file_name مشخص نشود، یک نام پیش‌فرض بر اساس URL تولید می‌شود.
 # خطوط URL باید بلافاصله بعد از خط "TARGET_URLS=" شروع شوند و با یک خط خالی یا یک تنظیم دیگر پایان یابند.
 TARGET_URLS=
-https://example.com/your-first-subscription-list,type=ss,count_per_url=20
-https://example.com/your-second-subscription-list,type=vmess,vless
-https://example.com/another-list-that-might-fail
+https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_BASE64.txt,count_per_url=0,output_file_name=roosterkid_v2ray.txt
+https://raw.githubusercontent.com/Rayan-Config/C-Sub/refs/heads/main/configs/proxy.txt,count_per_url=0,output_file_name=rayan_proxy.txt
+https://raw.githubusercontent.com/maimengmeng/mysub/refs/heads/main/valid_content.txt,count_per_url=0,output_file_name=maimengmeng.txt
+https://shadowmere.xyz/api/b64sub/,count_per_url=0,output_file_name=shadowmere.txt
+https://raw.githubusercontent.com/maimengmeng/mysub/refs/heads/main/valid_content.txt,type=AnyTLS,count_per_url=0,output_file_name=maimengmeng_AnyTLS.txt
 
 # پروتکل‌های دیگر که به صورت پیش‌فرض غیرفعال هستند، اما می‌توانید آن‌ها را فعال کنید:
 # Warp
