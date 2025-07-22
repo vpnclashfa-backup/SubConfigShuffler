@@ -1,6 +1,6 @@
 # .github/workflows/shuffle-configs.yml
 # این Workflow گیت‌هاب اکشن را برای به‌هم‌ریختن و فیلتر کردن تنظیمات اشتراک تعریف می‌کند.
-# اکنون از پایتون برای اجرای منطق اصلی استفاده می‌کند.
+# اکنون از پایتون برای اجرای منطق اصلی استفاده می‌کند و خروجی را به مخزن push می‌کند.
 
 name: Shuffle Subscription Configs # نام Workflow که در تب "Actions" نمایش داده می‌شود
 
@@ -30,9 +30,12 @@ jobs:
       - name: Run Shuffle Script # مرحله: اجرای اسکریپت به‌هم‌ریختن
         run: python main.py # اجرای اسکریپت main.py با پایتون
 
-      - name: Upload Shuffled Configs # مرحله: آپلود فایل خروجی به عنوان Artifact
-        uses: actions/upload-artifact@v4 # استفاده از اکشن رسمی برای آپلود Artifact
-        with:
-          name: shuffled-configs # نام Artifact
-          # مسیر پوشه خروجی را مشخص می‌کنیم تا تمام فایل‌های تولید شده آپلود شوند.
-          path: shuffled_outputs/ # مسیر پوشه خروجی
+      - name: Commit and Push Changes # مرحله: کامیت و push کردن فایل‌های خروجی به مخزن
+        run: |
+          git config user.name "github-actions[bot]" # تنظیم نام کاربر برای کامیت
+          git config user.email "github-actions[bot]@users.noreply.github.com" # تنظیم ایمیل کاربر برای کامیت
+          git add shuffled_outputs/ # اضافه کردن پوشه خروجی به staging area
+          git commit -m "Update shuffled configs" || echo "No changes to commit" # کامیت کردن تغییرات، اگر تغییری نباشد خطا نمی‌دهد
+          git push # push کردن تغییرات به مخزن
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # استفاده از توکن پیش‌فرض گیت‌هاب برای احراز هویت
