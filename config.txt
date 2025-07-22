@@ -31,9 +31,9 @@ OUTPUT_FILE_NAME=combined_shuffled_configs.txt
 TARGET_URLS=
 https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_BASE64.txt,count_per_url=0,output_file_name=roosterkid_v2ray.txt
 https://raw.githubusercontent.com/Rayan-Config/C-Sub/refs/heads/main/configs/proxy.txt,count_per_url=0,output_file_name=rayan_proxy.txt
-https://raw.githubusercontent.com/maimengmeng/mysub/refs/heads/main/valid_content.txt,count_per_url=0,output_file_name=maimengmeng.txt
+https://raw.githubusercontent.com/maimengmeng/mysub/refs/heads/main/valid_content.txt,count_per_url=500,output_file_name=maimengmeng.txt
 https://shadowmere.xyz/api/b64sub/,count_per_url=0,output_file_name=shadowmere.txt
-https://raw.githubusercontent.com/maimengmeng/mysub/refs/heads/main/valid_content.txt,type=AnyTLS,count_per_url=0,output_file_name=maimengmeng_AnyTLS.txt
+https://raw.githubusercontent.com/maimengmeng/mysub/refs/heads/main/valid_content_all.txt,type=AnyTLS,count_per_url=0,output_file_name=maimengmeng_AnyTLS.txt
 
 # پروتکل‌های دیگر که به صورت پیش‌فرض غیرفعال هستند، اما می‌توانید آن‌ها را فعال کنید:
 # Warp
