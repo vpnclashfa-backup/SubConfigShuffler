@@ -1,0 +1,36 @@
+# config.txt
+# این فایل حاوی تمام تنظیمات برای GitHub Action شما است.
+# هر خط یک تنظیم را مشخص می‌کند. خطوطی که با # شروع می‌شوند، نادیده گرفته می‌شوند.
+# مقادیر رشته‌ای نیازی به نقل قول ندارند.
+
+# تعداد نهایی تنظیماتی که باید از مجموع لیست‌ها انتخاب شوند
+# برای نامحدود بودن تعداد، عدد 0 را وارد کنید.
+GLOBAL_COUNT=300
+
+# (اختیاری) لیست کاما-جدا شده از انواع تنظیمات برای فیلتر کردن سراسری
+# این پروتکل‌ها به صورت پیش‌فرض فعال هستند:
+# Shadowsocks, ShadowsocksR, Mieru, Snell, VMess, VLESS, Trojan, AnyTLS, Hysteria, Hysteria2, TUIC, WireGuard, SSH
+GLOBAL_TYPE=ss,ssr,mieru,snell,vmess,vless,trojan,anytls,hysteria,hysteria2,tuic,wireguard,ssh
+
+# نام پوشه‌ای که فایل خروجی در آن ذخیره می‌شود
+OUTPUT_FOLDER=shuffled_outputs
+
+# نام فایل خروجی
+OUTPUT_FILE_NAME=shuffled_configs.txt
+
+# لیست URLهای فایل تنظیمات اشتراک
+# هر URL در یک خط جداگانه قرار می‌گیرد.
+# برای هر URL می‌توانید تنظیمات خاصی را با کاما جدا کنید:
+# URL,type=ss,count_per_url=20
+# اگر type یا count_per_url مشخص نشود، از تنظیمات سراسری استفاده می‌شود.
+# خطوط URL باید بلافاصله بعد از خط "TARGET_URLS=" شروع شوند و با یک خط خالی یا یک تنظیم دیگر پایان یابند.
+TARGET_URLS=
+https://example.com/your-first-subscription-list,type=ss,count_per_url=20
+https://example.com/your-second-subscription-list,type=vmess,vless
+https://example.com/another-list-that-might-fail
+
+# پروتکل‌های دیگر که به صورت پیش‌فرض غیرفعال هستند، اما می‌توانید آن‌ها را فعال کنید:
+# Warp
+# Juicity
+# HTTP
+# SOCKS
