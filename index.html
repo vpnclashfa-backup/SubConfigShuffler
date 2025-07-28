@@ -113,6 +113,7 @@
             border-radius: 0.75rem;
         }
         input[type="text"], textarea, input[type="file"], select { /* Added select */
+            /* Changed from bg-gray-50 to var(--input-bg) for consistency */
             background-color: var(--input-bg);
             border-color: var(--border-color);
             color: var(--text-color-primary);
@@ -282,7 +283,12 @@
             border-color: var(--blue-highlight-border);
         }
         .custom-checkbox-label input[type="checkbox"] {
-            display: none; /* Hide native checkbox */
+            /* Hide native checkbox visually but keep it interactive */
+            opacity: 0;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
         }
         .custom-checkbox-label .checkbox-indicator {
             width: 1.25rem; /* w-5 */
@@ -305,16 +311,21 @@
             stroke: white;
         }
         /* For radio buttons in filter section (e.g., count type, output type) */
-        .radio-group input[type="radio"].hidden + label span:first-child {
-            /* This targets the custom indicator for radios if you add one */
-            /* For now, it just ensures text alignment */
-            flex-grow: 1; /* Allow text to take available space */
+        .radio-group input[type="radio"].hidden + label {
+            /* This targets the custom label for radios */
+            opacity: 1; /* Ensure label is visible */
+            position: relative; /* Ensure it's positioned normally */
             text-align: center; /* Center text in radio labels */
-        }
-        .radio-group label {
-            /* Adjust padding and alignment for radio labels */
             padding: 0.5rem 0.75rem;
             justify-content: center;
+        }
+        .radio-group input[type="radio"] {
+            /* Hide native radio button visually but keep it interactive */
+            opacity: 0;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -429,7 +440,7 @@
                 <!-- Protocol Filter (Checkboxes) -->
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-medium mb-2">فیلتر پروتکل:</label>
-                    <div id="protocolFilterCheckboxes" class="grid grid-cols-2 gap-2">
+                    <div id="protocolFilterCheckboxesContainer" class="grid grid-cols-2 gap-2">
                         <!-- "همه" checkbox -->
                         <label class="custom-checkbox-label">
                             <input type="checkbox" name="protocol" value="all" id="protocolAll" checked>
@@ -504,7 +515,7 @@
                             <span class="checkbox-indicator"></span>
                             <span>SSH</span>
                         </label>
-                        <!-- Custom Protocol Input -->
+                        <!-- Custom Protocol Input Checkbox -->
                         <label class="custom-checkbox-label">
                             <input type="checkbox" name="protocol" value="custom" id="protocolCustomCheckbox">
                             <span class="checkbox-indicator"></span>
@@ -519,10 +530,10 @@
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-medium mb-2">تعداد کانفیگ:</label>
                     <div class="flex items-center gap-4">
-                        <input type="radio" id="countUnlimited" name="countType" value="unlimited" class="hidden" checked>
+                        <input type="radio" id="countUnlimited" name="countType" value="unlimited" checked>
                         <label for="countUnlimited" class="flex-grow justify-center py-2 px-3 text-sm">نامحدود</label>
                         
-                        <input type="radio" id="countLimited" name="countType" value="limited" class="hidden">
+                        <input type="radio" id="countLimited" name="countType" value="limited">
                         <label for="countLimited" class="flex-grow justify-center py-2 px-3 text-sm">محدود</label>
                         
                         <input type="number" id="limitCountInput" value="50" min="1" class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-700">
@@ -531,7 +542,7 @@
 
                 <!-- Cloudflare Only Filter -->
                 <div>
-                    <input type="checkbox" id="cloudflareOnlyFilter" class="hidden">
+                    <input type="checkbox" id="cloudflareOnlyFilter">
                     <label for="cloudflareOnlyFilter" class="flex items-center justify-start py-2 px-3 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-pointer">
                         <span class="w-4 h-4 inline-block mr-2 rounded border border-gray-400 flex-shrink-0"></span>
                         <span class="text-gray-700">فقط کانفیگ‌های Cloudflare</span>
