@@ -7,7 +7,6 @@ name: Shuffle Subscription Configs # نام Workflow که در تب "Actions" ن
 
 on:
   push:
-    branches: [ main ] # این Workflow هنگام push به شاخه 'main' اجرا می‌شود
   schedule:
     # اجرا روزی دو بار به وقت تهران (UTC+3:30)
     # 8:00 صبح تهران = 4:30 صبح UTC
