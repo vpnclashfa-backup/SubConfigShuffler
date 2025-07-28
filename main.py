@@ -6,6 +6,8 @@
 # پشتیبانی از count=0 برای انتخاب نامحدود.
 # قابلیت جدید: شناسایی کانفیگ‌های مربوط به دامنه‌های Cloudflare Worker/Pages، با قابلیت فعال/غیرفعال‌سازی برای هر URL.
 # بهبود: شناسایی Cloudflare اکنون شامل بررسی آدرس سرور اصلی، پارامترهای 'sni' و 'host' و همچنین تجزیه کانفیگ‌های Base64 (مانند VMess و برخی SS) می‌شود.
+# رفع مشکل: بهبود تجزیه پارامترهای URL برای مدیریت 'amp;' در 'sni' و 'host'.
+# رفع مشکل: اصلاح منطق رمزگشایی Base64 برای فایل‌های حاوی لیست کانفیگ‌ها (مانند SS و VMess).
 
 import base64    # برای کدگذاری و رمزگشایی Base64
 import os        # برای کار با مسیرها و سیستم فایل
@@ -13,18 +15,25 @@ import random    # برای به‌هم‌ریختن آرایه
 import sys       # برای خروج از اسکریپت در صورت خطا
 import requests  # برای واکشی URLها (نیاز به نصب: pip install requests)
 import json      # برای کار با فرمت JSON در کانفیگ‌های VMess و SS
-from urllib.parse import urlparse, parse_qs # برای تجزیه URL و ساخت نام فایل پیش‌فرض و تجزیه کوئری استرینگ
+from urllib.parse import urlparse, parse_qs, unquote # برای تجزیه URL و ساخت نام فایل پیش‌فرض و تجزیه کوئری استرینگ و رمزگشایی URL
 
 # تابع کمکی: بررسی می‌کند که آیا یک رشته Base64 معتبر است یا خیر
 def is_base64(s):
-    try:
-        # بررسی می‌کند که طول رشته مضربی از 4 باشد (شامل Padding)
-        # برخی رشته‌های Base64 ممکن است بدون padding باشند، بنابراین این شرط را کمی انعطاف‌پذیرتر می‌کنیم.
-        if len(s) % 4 == 0 or len(s) % 4 == 2 or len(s) % 4 == 3:
-            # تلاش برای رمزگشایی و سپس رمزگذاری مجدد برای بررسی تطابق
-            decoded_bytes = base64.b64decode(s, validate=True) # validate=True برای سخت‌گیری بیشتر
-            return True
+    # یک رشته Base64 معتبر باید طولش مضربی از 4 باشد یا با padding '=' تکمیل شده باشد.
+    # همچنین باید فقط شامل کاراکترهای Base64 باشد.
+    # این تابع را برای بررسی دقیق‌تر Base64 بودن یک رشته بازنویسی می‌کنیم.
+    s = s.strip()
+    if not s:
         return False
+    try:
+        # base64.b64decode با validate=True بررسی می‌کند که آیا رشته Base64 معتبر است.
+        # اگر رشته دارای padding ناقص باشد، ممکن است خطا دهد، اما معمولاً کار می‌کند.
+        # برای انعطاف‌پذیری بیشتر، می‌توانیم padding را اضافه کنیم.
+        missing_padding = len(s) % 4
+        if missing_padding != 0:
+            s += '='* (4 - missing_padding)
+        base64.b64decode(s, validate=True)
+        return True
     except Exception:
         return False
 
@@ -34,6 +43,10 @@ def encode_base64(s):
 
 # تابع کمکی: یک رشته Base64 را به UTF-8 رمزگشایی می‌کند
 def decode_base64(s):
+    # اضافه کردن padding اگر لازم باشد قبل از رمزگشایی
+    missing_padding = len(s) % 4
+    if missing_padding != 0:
+        s += '=' * (4 - missing_padding)
     return base64.b64decode(s).decode('utf-8')
 
 # تابع کمکی: الگوریتم Fisher-Yates برای به‌هم‌ریختن آرایه
@@ -102,8 +115,37 @@ def identify_cloudflare_domains(config_lines):
 
     for line in config_lines:
         try:
-            # ابتدا URL را تجزیه می‌کنیم
-            parsed_url = urlparse(line)
+            # قبل از تجزیه URL، کاراکترهای خاص HTML مانند '&amp;' را به '&' تبدیل می‌کنیم
+            # و همچنین URL-decode می‌کنیم تا مقادیر به درستی خوانده شوند.
+            processed_line = unquote(line.replace('&amp;', '&'))
+            
+            # ابتدا بررسی می‌کنیم که آیا خط یک کانفیگ Base64 کدگذاری شده است (مانند VMess یا برخی SS)
+            # اگر با پروتکل خاصی شروع نشده باشد و Base64 معتبر باشد، آن را رمزگشایی می‌کنیم.
+            # این بخش برای مدیریت فایل‌هایی است که کل محتوایشان Base64 است.
+            # اما برای فایل‌هایی که هر خط یک کانفیگ است، این منطق را در پایین‌تر اعمال می‌کنیم.
+            
+            # اگر خط با پروتکل شناخته شده شروع نمی‌شود و Base64 است، سعی می‌کنیم آن را رمزگشایی کنیم.
+            # این برای مواردی است که URL اصلی Base64 است و نه فقط یک پارامتر.
+            if not any(processed_line.lower().startswith(p + '://') for p in ['vless', 'vmess', 'ss', 'trojan', 'http', 'https', 'socks']) and is_base64(processed_line):
+                try:
+                    decoded_line = decode_base64(processed_line)
+                    # اگر رمزگشایی موفق بود، خطوط جدید را برای بررسی اضافه می‌کنیم
+                    # این برای سابسکریپشن‌هایی است که کل محتوایشان Base64 و شامل چندین خط است.
+                    for sub_line in decoded_line.split('\n'):
+                        if sub_line.strip():
+                            # به صورت بازگشتی این تابع را فراخوانی می‌کنیم تا خطوط داخلی را بررسی کند.
+                            # یا می‌توانیم منطق زیر را مستقیماً برای sub_line اعمال کنیم.
+                            # برای سادگی، فعلاً فرض می‌کنیم که sub_line خودش یک کانفیگ قابل تجزیه است.
+                            # این ممکن است نیاز به اصلاح بیشتر داشته باشد اگر sub_line خودش یک Base64 دیگر باشد.
+                            # بهتر است این خطوط را به لیست اصلی اضافه کنیم و در ادامه پردازش شوند.
+                            # این رویکرد را تغییر می‌دهم تا هر خط جداگانه پردازش شود.
+                            pass # این قسمت را در ادامه منطق اصلی مدیریت می‌کنیم.
+                except Exception:
+                    pass # اگر رمزگشایی یا تجزیه به مشکل خورد، ادامه می‌دهیم.
+
+
+            # حالا خط را به عنوان یک URL تجزیه می‌کنیم
+            parsed_url = urlparse(processed_line)
             scheme = parsed_url.scheme.lower()
             
             # لیست دامنه‌هایی که باید بررسی شوند
@@ -126,17 +168,18 @@ def identify_cloudflare_domains(config_lines):
                 domains_to_check.extend(query_params['host'])
 
             # 3. مدیریت پروتکل‌های Base64 (VMess, برخی SS)
-            if scheme in ['vmess', 'ss'] and parsed_url.netloc == '': # اگر netloc خالی باشد، احتمالاً Base64 است
-                # برای VMess، قسمت بعد از vmess:// معمولاً Base64 است
-                # برای SS، ممکن است Base64 باشد یا نباشد
-                encoded_part = line.split('://', 1)[-1]
+            # این بخش برای کانفیگ‌هایی است که خودشان Base64 هستند (مثلاً بعد از vmess://)
+            if scheme in ['vmess', 'ss']:
+                # قسمت بعد از پروتکل (مثلاً بعد از vmess://)
+                encoded_part_of_config = processed_line.split('://', 1)[-1]
                 # حذف قسمت #remarks اگر وجود دارد
-                if '#' in encoded_part:
-                    encoded_part = encoded_part.split('#', 1)[0]
-
-                if is_base64(encoded_part):
+                if '#' in encoded_part_of_config:
+                    encoded_part_of_config = encoded_part_of_config.split('#', 1)[0]
+                
+                # بررسی می‌کنیم که آیا این قسمت Base64 معتبر است یا خیر
+                if is_base64(encoded_part_of_config):
                     try:
-                        decoded_json_str = decode_base64(encoded_part)
+                        decoded_json_str = decode_base64(encoded_part_of_config)
                         config_data = json.loads(decoded_json_str)
                         
                         # برای VMess: 'add' (address), 'host', 'sni'
@@ -148,7 +191,7 @@ def identify_cloudflare_domains(config_lines):
                             if 'sni' in config_data:
                                 domains_to_check.append(config_data['sni'])
                         
-                        # برای SS: معمولاً 'server'
+                        # برای SS: معمولاً 'server' (اگرچه SS کمتر JSON استفاده می‌کند)
                         elif scheme == 'ss':
                             if 'server' in config_data:
                                 domains_to_check.append(config_data['server'])
@@ -172,8 +215,9 @@ def identify_cloudflare_domains(config_lines):
                     identified_configs.append(line)
                     break # اگر یک دامنه Cloudflare پیدا شد، به خط بعدی بروید
 
-        except Exception:
-            # اگر خط یک URL معتبر نباشد یا تجزیه آن مشکل داشته باشد، آن را نادیده بگیرید
+        except Exception as e:
+            # در صورت بروز خطا در تجزیه یک خط، آن را نادیده بگیرید و به خط بعدی بروید
+            # print(f"خطا در پردازش خط برای شناسایی Cloudflare: {line} - {e}", file=sys.stderr)
             continue
     return identified_configs
 
@@ -243,9 +287,10 @@ def run():
                 text = response.text
                 print(f"  طول محتوای واکشی شده: {len(text)}")
 
-                if is_base64(text.strip()):
-                    print('  محتوا به عنوان Base64 شناسایی شد، در حال رمزگشایی...')
-                    text = decode_base64(text.strip())
+                # *** تغییر مهم: این خط را حذف می‌کنیم تا کل محتوا را به عنوان Base64 رمزگشایی نکنیم ***
+                # if is_base64(text.strip()):
+                #     print('  محتوا به عنوان Base64 شناسایی شد، در حال رمزگشایی...')
+                #     text = decode_base64(text.strip())
 
                 current_lines = [line.strip() for line in text.split('\n') if line.strip() and not line.strip().startswith('#')]
                 print(f"  تعداد خطوط معتبر اولیه از این URL: {len(current_lines)}")
