@@ -10,6 +10,7 @@
 # رفع مشکل: اصلاح منطق رمزگشایی Base64 برای فایل‌های حاوی لیست کانفیگ‌ها (مانند SS و VMess).
 # رفع مشکل: بازگرداندن منطق رمزگشایی Base64 برای کل محتوای واکشی شده در تابع run().
 # تغییر جدید: اگر detect_cloudflare فعال باشد، فقط کانفیگ‌های Cloudflare در فایل خروجی ذخیره می‌شوند.
+# قابلیت جدید: تولید فایل README.md با لینک به فایل‌های خروجی Raw در GitHub.
 
 import base64    # برای کدگذاری و رمزگشایی Base64
 import os        # برای کار با مسیرها و سیستم فایل
@@ -191,6 +192,39 @@ def identify_cloudflare_domains(config_lines):
             continue
     return identified_configs
 
+# تابع جدید: تولید فایل README.md با لینک به فایل‌های خروجی Raw در GitHub
+def generate_readme(output_folder, generated_files):
+    readme_content = "# Generated Subscription Configs\n\n"
+    readme_content += "This README lists the generated subscription configuration files.\n\n"
+
+    # Get GitHub repository details from environment variables
+    # These are available when running in GitHub Actions
+    repo_owner = os.getenv('GITHUB_REPOSITORY_OWNER') # e.g., 'your-username'
+    repo_name_full = os.getenv('GITHUB_REPOSITORY') # e.g., 'your-username/your-repo-name'
+    repo_name = repo_name_full.split('/')[-1] if repo_name_full else 'your-repo-name'
+    branch_name = os.getenv('GITHUB_REF_NAME', 'main') # e.g., 'main' or 'master'
+
+    if not repo_owner:
+        print("هشدار: متغیر محیطی GITHUB_REPOSITORY_OWNER یافت نشد. از نام کاربری پیش‌فرض استفاده می‌شود.", file=sys.stderr)
+        repo_owner = "your-github-username" # Fallback for local testing
+
+    if not generated_files:
+        readme_content += "No configuration files were generated in this run.\n"
+    else:
+        readme_content += "## Available Configs\n\n"
+        for file_name in generated_files:
+            # Construct the raw GitHub URL
+            # Example: https://raw.githubusercontent.com/username/repo/main/shuffled_outputs/file.txt
+            raw_url = f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/{branch_name}/{output_folder}/{file_name}"
+            # Remove .txt extension for the link text
+            link_text = file_name.replace('.txt', '')
+            readme_content += f"- [{link_text}]({raw_url})\n"
+
+    readme_file_path = os.path.join(os.getcwd(), 'README.md')
+    with open(readme_file_path, 'w', encoding='utf-8') as f:
+        f.write(readme_content)
+    print(f"\nREADME.md generated at: {readme_file_path}")
+
 # تابع اصلی اجرا که توسط گیت‌هاب اکشن فراخوانی می‌شود
 def run():
     try:
@@ -219,6 +253,9 @@ def run():
         full_output_path = os.path.join(os.getcwd(), output_folder)
         os.makedirs(full_output_path, exist_ok=True)
         print(f"پوشه خروجی ایجاد شد: {full_output_path}")
+
+        # لیست برای ذخیره نام فایل‌های خروجی که با موفقیت تولید شده‌اند
+        successfully_generated_files = []
 
         for url_config in target_urls_configs:
             current_url = url_config.get('url')
@@ -257,7 +294,7 @@ def run():
                 text = response.text
                 print(f"  طول محتوای واکشی شده: {len(text)}")
 
-                # *** بازگرداندن منطق رمزگشایی Base64 برای کل محتوا ***
+                # بازگرداندن منطق رمزگشایی Base64 برای کل محتوا
                 if is_base64(text.strip()):
                     print('  محتوا به عنوان Base64 شناسایی شد، در حال رمزگشایی...')
                     try:
@@ -265,8 +302,6 @@ def run():
                         print(f"  طول محتوای رمزگشایی شده: {len(text)}")
                     except Exception as e:
                         print(f"  خطا در رمزگشایی Base64 محتوای کامل: {e}", file=sys.stderr)
-                        # اگر رمزگشایی کل محتوا با مشکل مواجه شد، آن را به عنوان متن خالی در نظر می‌گیریم
-                        # تا از خطاهای بعدی جلوگیری شود و پردازش ادامه یابد.
                         text = "" 
 
                 current_lines = [line.strip() for line in text.split('\n') if line.strip() and not line.strip().startswith('#')]
@@ -294,29 +329,32 @@ def run():
 
                 shuffle_array(current_lines) # به‌هم‌ریختن خطوط این URL
 
-                # *** تغییر جدید: انتخاب خطوط برای ذخیره بر اساس detect_cloudflare_for_url ***
+                # انتخاب خطوط برای ذخیره بر اساس detect_cloudflare_for_url
                 if detect_cloudflare_for_url:
-                    # اگر شناسایی Cloudflare فعال است، فقط کانفیگ‌های Cloudflare را ذخیره کن
                     selected_lines = cloudflare_configs
                     print(f"  تعداد {len(selected_lines)} خط Cloudflare برای این URL انتخاب شد.")
                 else:
-                    # در غیر این صورت، خطوط فیلتر شده بر اساس نوع و تعداد را ذخیره کن
                     if current_count_per_url == 0:
                         selected_lines = current_lines
                     else:
                         selected_lines = current_lines[:current_count_per_url]
                     print(f"  تعداد {len(selected_lines)} خط برای این URL انتخاب شد.")
 
+                # فقط در صورتی فایل را ذخیره کن که خطوطی برای ذخیره وجود داشته باشد
+                if selected_lines:
+                    # اتصال خطوط انتخاب شده و کدگذاری نهایی به Base64
+                    final_text = "\r\n".join(selected_lines)
+                    base64_data = encode_base64(final_text)
 
-                # اتصال خطوط انتخاب شده و کدگذاری نهایی به Base64
-                final_text = "\r\n".join(selected_lines)
-                base64_data = encode_base64(final_text)
+                    # نوشتن خروجی به فایل مخصوص این URL
+                    output_file_path = os.path.join(full_output_path, current_output_file_name)
+                    with open(output_file_path, 'w', encoding='utf-8') as f:
+                        f.write(base64_data)
+                    print(f"  خروجی این URL در فایل ذخیره شد: {output_file_path}")
+                    successfully_generated_files.append(current_output_file_name) # اضافه کردن نام فایل به لیست موفق‌ها
+                else:
+                    print(f"  هیچ خطی برای ذخیره از این URL انتخاب نشد. فایل خروجی ایجاد نشد.")
 
-                # نوشتن خروجی به فایل مخصوص این URL
-                output_file_path = os.path.join(full_output_path, current_output_file_name)
-                with open(output_file_path, 'w', encoding='utf-8') as f:
-                    f.write(base64_data)
-                print(f"  خروجی این URL در فایل ذخیره شد: {output_file_path}")
 
             except requests.exceptions.Timeout:
                 print(f"  خطا: واکشی URL '{current_url}' به دلیل اتمام زمان متوقف شد.", file=sys.stderr)
@@ -324,6 +362,9 @@ def run():
                 print(f"  خطا در واکشی URL '{current_url}': {e}", file=sys.stderr)
             except Exception as e:
                 print(f"  خطای غیرمنتظره در پردازش URL '{current_url}': {e}", file=sys.stderr)
+
+        # پس از پردازش تمام URLها، README را تولید کن
+        generate_readme(output_folder, successfully_generated_files)
 
     except FileNotFoundError:
         print(f"خطا: فایل پیکربندی config.txt یافت نشد.", file=sys.stderr)
