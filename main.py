@@ -2,24 +2,29 @@
 # این اسکریپت پایتون منطق اصلی به‌هم‌ریختن و فیلتر کردن تنظیمات اشتراک را پیاده‌سازی می‌کند.
 # اکنون تنظیمات را از فایل config.txt می‌خواند و خروجی را در یک فایل مشخص می‌نویسد.
 # این نسخه در صورت بروز مشکل در واکشی یک URL، به URL بعدی می‌رود و فرایند را متوقف نمی‌کند.
-# همچنین، امکان تنظیمات جداگانه (type، count_per_url، و output_file_name) برای هر URL را فراهم می‌کند.
+# همچنین، امکان تنظیمات جداگانه (type، count_per_url، output_file_name و detect_cloudflare) برای هر URL را فراهم می‌کند.
 # پشتیبانی از count=0 برای انتخاب نامحدود.
+# قابلیت جدید: شناسایی کانفیگ‌های مربوط به دامنه‌های Cloudflare Worker/Pages، با قابلیت فعال/غیرفعال‌سازی برای هر URL.
+# بهبود: شناسایی Cloudflare اکنون شامل بررسی آدرس سرور اصلی، پارامترهای 'sni' و 'host' و همچنین تجزیه کانفیگ‌های Base64 (مانند VMess و برخی SS) می‌شود.
 
 import base64    # برای کدگذاری و رمزگشایی Base64
 import os        # برای کار با مسیرها و سیستم فایل
 import random    # برای به‌هم‌ریختن آرایه
 import sys       # برای خروج از اسکریپت در صورت خطا
 import requests  # برای واکشی URLها (نیاز به نصب: pip install requests)
-from urllib.parse import urlparse # برای تجزیه URL و ساخت نام فایل پیش‌فرض
+import json      # برای کار با فرمت JSON در کانفیگ‌های VMess و SS
+from urllib.parse import urlparse, parse_qs # برای تجزیه URL و ساخت نام فایل پیش‌فرض و تجزیه کوئری استرینگ
 
 # تابع کمکی: بررسی می‌کند که آیا یک رشته Base64 معتبر است یا خیر
 def is_base64(s):
     try:
         # بررسی می‌کند که طول رشته مضربی از 4 باشد (شامل Padding)
-        if len(s) % 4 != 0:
-            return False
-        # تلاش برای رمزگشایی و سپس رمزگذاری مجدد برای بررسی تطابق
-        return base64.b64encode(base64.b64decode(s)).decode('utf-8') == s
+        # برخی رشته‌های Base64 ممکن است بدون padding باشند، بنابراین این شرط را کمی انعطاف‌پذیرتر می‌کنیم.
+        if len(s) % 4 == 0 or len(s) % 4 == 2 or len(s) % 4 == 3:
+            # تلاش برای رمزگشایی و سپس رمزگذاری مجدد برای بررسی تطابق
+            decoded_bytes = base64.b64decode(s, validate=True) # validate=True برای سخت‌گیری بیشتر
+            return True
+        return False
     except Exception:
         return False
 
@@ -73,6 +78,8 @@ def read_config(config_file_path):
                                         print(f"هشدار: مقدار 'count_per_url' نامعتبر برای URL: {url}", file=sys.stderr)
                                 elif key.strip() == 'output_file_name':
                                     url_config['output_file_name'] = value.strip()
+                                elif key.strip() == 'detect_cloudflare': # پارامتر جدید
+                                    url_config['detect_cloudflare'] = value.strip().lower() == 'true'
                     target_urls_list.append(url_config)
                 else: # اگر خط دیگر یک URL نیست، بخش URLها به پایان رسیده است
                     target_urls_section = False
@@ -87,6 +94,88 @@ def read_config(config_file_path):
 
     config['targetUrls'] = target_urls_list
     return config
+
+# تابع جدید: شناسایی کانفیگ‌های مربوط به دامنه‌های Cloudflare Worker/Pages
+def identify_cloudflare_domains(config_lines):
+    cloudflare_domains = [".workers.dev", ".pages.dev"]
+    identified_configs = []
+
+    for line in config_lines:
+        try:
+            # ابتدا URL را تجزیه می‌کنیم
+            parsed_url = urlparse(line)
+            scheme = parsed_url.scheme.lower()
+            
+            # لیست دامنه‌هایی که باید بررسی شوند
+            domains_to_check = []
+
+            # 1. بررسی آدرس سرور اصلی (netloc)
+            netloc = parsed_url.netloc
+            if ':' in netloc:
+                domain_from_netloc = netloc.split(':')[0]
+            else:
+                domain_from_netloc = netloc
+            if domain_from_netloc:
+                domains_to_check.append(domain_from_netloc)
+
+            # 2. بررسی پارامترهای 'sni' و 'host' در رشته کوئری
+            query_params = parse_qs(parsed_url.query)
+            if 'sni' in query_params:
+                domains_to_check.extend(query_params['sni'])
+            if 'host' in query_params:
+                domains_to_check.extend(query_params['host'])
+
+            # 3. مدیریت پروتکل‌های Base64 (VMess, برخی SS)
+            if scheme in ['vmess', 'ss'] and parsed_url.netloc == '': # اگر netloc خالی باشد، احتمالاً Base64 است
+                # برای VMess، قسمت بعد از vmess:// معمولاً Base64 است
+                # برای SS، ممکن است Base64 باشد یا نباشد
+                encoded_part = line.split('://', 1)[-1]
+                # حذف قسمت #remarks اگر وجود دارد
+                if '#' in encoded_part:
+                    encoded_part = encoded_part.split('#', 1)[0]
+
+                if is_base64(encoded_part):
+                    try:
+                        decoded_json_str = decode_base64(encoded_part)
+                        config_data = json.loads(decoded_json_str)
+                        
+                        # برای VMess: 'add' (address), 'host', 'sni'
+                        if scheme == 'vmess':
+                            if 'add' in config_data:
+                                domains_to_check.append(config_data['add'])
+                            if 'host' in config_data:
+                                domains_to_check.append(config_data['host'])
+                            if 'sni' in config_data:
+                                domains_to_check.append(config_data['sni'])
+                        
+                        # برای SS: معمولاً 'server'
+                        elif scheme == 'ss':
+                            if 'server' in config_data:
+                                domains_to_check.append(config_data['server'])
+                            # برخی SS client ها ممکن است host یا sni را در JSON داشته باشند
+                            if 'host' in config_data:
+                                domains_to_check.append(config_data['host'])
+                            if 'sni' in config_data:
+                                domains_to_check.append(config_data['sni'])
+
+                    except (json.JSONDecodeError, UnicodeDecodeError):
+                        # اگر Base64 بود اما JSON معتبر نبود، یا رمزگشایی مشکل داشت، نادیده بگیرید
+                        pass
+                
+            # بررسی نهایی دامنه‌های جمع‌آوری شده
+            for domain in domains_to_check:
+                # اطمینان از اینکه دامنه فقط شامل بخش دامنه و بدون پورت است
+                if ':' in domain:
+                    domain = domain.split(':')[0]
+                
+                if any(domain.lower().endswith(cf_domain) for cf_domain in cloudflare_domains):
+                    identified_configs.append(line)
+                    break # اگر یک دامنه Cloudflare پیدا شد، به خط بعدی بروید
+
+        except Exception:
+            # اگر خط یک URL معتبر نباشد یا تجزیه آن مشکل داشته باشد، آن را نادیده بگیرید
+            continue
+    return identified_configs
 
 # تابع اصلی اجرا که توسط گیت‌هاب اکشن فراخوانی می‌شود
 def run():
@@ -127,6 +216,7 @@ def run():
             current_type_param = url_config.get('type', global_type_param)
             current_count_per_url = url_config.get('count_per_url', global_count) # پیش‌فرض از global_count
             current_output_file_name = url_config.get('output_file_name')
+            detect_cloudflare_for_url = url_config.get('detect_cloudflare', False) # مقدار پیش‌فرض False
 
             # اگر output_file_name برای این URL مشخص نشده باشد، یک نام پیش‌فرض تولید می‌کند
             if not current_output_file_name:
@@ -142,6 +232,8 @@ def run():
                 print(f"  فیلتر نوع خاص برای این URL: {current_type_param}")
             print(f"  تعداد خطوط برای انتخاب از این URL: {'نامحدود' if current_count_per_url == 0 else current_count_per_url}")
             print(f"  فایل خروجی این URL: {current_output_file_name}")
+            print(f"  شناسایی Cloudflare برای این URL: {'فعال' if detect_cloudflare_for_url else 'غیرفعال'}")
+
 
             try:
                 # واکشی محتوا از URL مقصد
@@ -162,6 +254,20 @@ def run():
                     types = [t.strip().lower() for t in current_type_param.split(',')]
                     current_lines = [line for line in current_lines if any(line.lower().startswith(f"{t}://") for t in types)]
                     print(f"  تعداد خطوط پس از فیلتر نوع از این URL: {len(current_lines)}")
+
+                # شناسایی کانفیگ‌های Cloudflare فقط در صورت فعال بودن detect_cloudflare_for_url
+                if detect_cloudflare_for_url:
+                    cloudflare_configs = identify_cloudflare_domains(current_lines)
+                    if cloudflare_configs:
+                        print("\n  --- کانفیگ‌های Cloudflare شناسایی شده در این URL: ---")
+                        for cf_config in cloudflare_configs:
+                            print(f"    - {cf_config}")
+                        print("  --------------------------------------------------")
+                    else:
+                        print("  هیچ کانفیگ Cloudflare در این URL شناسایی نشد.")
+                else:
+                    print("  شناسایی Cloudflare برای این URL غیرفعال است.")
+
 
                 shuffle_array(current_lines) # به‌هم‌ریختن خطوط این URL
 
