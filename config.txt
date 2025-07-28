@@ -42,7 +42,7 @@ https://raw.githubusercontent.com/10ium/V2ray-Config/main/Splitted-By-Protocol/s
 https://raw.githubusercontent.com/10ium/V2ray-Config/main/Splitted-By-Protocol/tuic.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_Config_tuic_cloudflare.txt
 https://raw.githubusercontent.com/10ium/V2ray-Config/main/Splitted-By-Protocol/hysteria2.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_Config_hysteria2_cloudflare.txt
 https://raw.githubusercontent.com/10ium/V2ray-Config/main/Warp_sub.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_Config_Warp_cloudflare.txt
-https://raw.githubusercontent.com/10ium/V2ray-Config/main/All_Configs_base64_Sub.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_Config_All_cloudflare.txt
+https://raw.githubusercontent.com/10ium/V2ray-Config/main/All_Configs_Sub.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_Config_All_cloudflare.txt
 
 # پروتکل‌های دیگر که به صورت پیش‌فرض غیرفعال هستند، اما می‌توانید آن‌ها را فعال کنید:
 # Warp
