@@ -43,6 +43,32 @@ https://raw.githubusercontent.com/10ium/V2ray-Config/main/Splitted-By-Protocol/t
 https://raw.githubusercontent.com/10ium/V2ray-Config/main/Splitted-By-Protocol/hysteria2.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_Config_hysteria2_cloudflare.txt
 https://raw.githubusercontent.com/10ium/V2ray-Config/main/Warp_sub.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_Config_Warp_cloudflare.txt
 https://raw.githubusercontent.com/10ium/V2ray-Config/main/All_Configs_Sub.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_Config_All_cloudflare.txt
+https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/base64/mix,detect_cloudflare=true,count_per_url=0,output_file_name=itsyebekhe_PSG_mix_cloudflare.txt
+https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/base64/hy2,detect_cloudflare=true,count_per_url=0,output_file_name=itsyebekhe_PSG_hy2_cloudflare.txt
+https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/base64/reality,detect_cloudflare=true,count_per_url=0,output_file_name=itsyebekhe_PSG_reality_cloudflare.txt
+https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/base64/xhttp,detect_cloudflare=true,count_per_url=0,output_file_name=itsyebekhe_PSG_xhttp_cloudflare.txt
+https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/base64/ss,detect_cloudflare=true,count_per_url=0,output_file_name=itsyebekhe_PSG_ss_cloudflare.txt
+https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/base64/trojan,detect_cloudflare=true,count_per_url=0,output_file_name=itsyebekhe_PSG_trojan_cloudflare.txt
+https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/base64/vless,detect_cloudflare=true,count_per_url=0,output_file_name=itsyebekhe_PSG_vless_cloudflare.txt
+https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/base64/tuic,detect_cloudflare=true,count_per_url=0,output_file_name=itsyebekhe_PSG_tuic_cloudflare.txt
+https://raw.githubusercontent.com/10ium/telegram-configs-collector/main/splitted/mixed,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_Config_All_cloudflare.txt
+https://raw.githubusercontent.com/10ium/V2Hub3/main/merged,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2Hub_merged_cloudflare.txt
+https://raw.githubusercontent.com/10ium/multi-proxy-config-fetcher/refs/heads/main/configs/proxy_configs.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_fetcher_cloudflare.txt
+https://raw.githubusercontent.com/10ium/HiN-VPN/main/subscription/normal/mix,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_V2ray_HiNVPN_mix_cloudflare.txt
+https://raw.githubusercontent.com/10ium/V2RayAggregator/refs/heads/master/Eternity.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_Aggregator_cloudflare.txt
+https://raw.githubusercontent.com/10ium/V2rayCollectorLite/main/mixed_iran.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_CollectorLite_Config_mixed_cloudflare.txt
+https://raw.githubusercontent.com/10ium/V2rayCollector/main/mixed_iran.txt,detect_cloudflare=true,count_per_url=0,output_file_name=10ium_Collector_mixed_cloudflare.txt
+https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/V2RAY_BASE64.txt,detect_cloudflare=true,count_per_url=0,output_file_name=roosterkid_cloudflare.txt
+https://raw.githubusercontent.com/Rayan-Config/C-Sub/refs/heads/main/configs/proxy.txt,detect_cloudflare=true,count_per_url=0,output_file_name=Rayan-Config_CSub_cloudflare.txt
+https://raw.githubusercontent.com/maimengmeng/mysub/refs/heads/main/valid_content_all.txt,detect_cloudflare=true,count_per_url=0,output_file_name=maimengmeng_cloudflare.txt
+https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mci/sub_1.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mci1_cloudflare.txt
+https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mci/sub_2.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mci2_cloudflare.txt
+https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mci/sub_3.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mci3_cloudflare.txt
+https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mci/sub_4.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mci4_cloudflare.txt
+https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_1.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mtn1_cloudflare.txt
+https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_2.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mtn2_cloudflare.txt
+https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_3.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mtn3_cloudflare.txt
+https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_4.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mtn4_cloudflare.txt
 
 # پروتکل‌های دیگر که به صورت پیش‌فرض غیرفعال هستند، اما می‌توانید آن‌ها را فعال کنید:
 # Warp
