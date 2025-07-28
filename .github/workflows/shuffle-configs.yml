@@ -1,6 +1,7 @@
 # .github/workflows/shuffle-configs.yml
 # این Workflow گیت‌هاب اکشن را برای به‌هم‌ریختن و فیلتر کردن تنظیمات اشتراک تعریف می‌کند.
 # اکنون از پایتون برای اجرای منطق اصلی استفاده می‌کند و خروجی را به مخزن push می‌کند.
+# تغییر جدید: README.md نیز در commit شامل می‌شود.
 
 name: Shuffle Subscription Configs # نام Workflow که در تب "Actions" نمایش داده می‌شود
 
@@ -38,7 +39,8 @@ jobs:
           git config user.name "github-actions[bot]" # تنظیم نام کاربر برای کامیت
           git config user.email "github-actions[bot]@users.noreply.github.com" # تنظیم ایمیل کاربر برای کامیت
           git add shuffled_outputs/ # اضافه کردن پوشه خروجی به staging area
-          git commit -m "Update shuffled configs" || echo "No changes to commit" # کامیت کردن تغییرات، اگر تغییری نباشد خطا نمی‌دهد
+          git add README.md # اضافه کردن فایل README.md به staging area
+          git commit -m "Update shuffled configs and README" || echo "No changes to commit" # کامیت کردن تغییرات، اگر تغییری نباشد خطا نمی‌دهد
           git push # push کردن تغییرات به مخزن
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # استفاده از توکن پیش‌فرض گیت‌هاب برای احراز هویت
