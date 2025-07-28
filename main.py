@@ -9,6 +9,7 @@
 # رفع مشکل: بهبود تجزیه پارامترهای URL برای مدیریت 'amp;' در 'sni' و 'host'.
 # رفع مشکل: اصلاح منطق رمزگشایی Base64 برای فایل‌های حاوی لیست کانفیگ‌ها (مانند SS و VMess).
 # رفع مشکل: بازگرداندن منطق رمزگشایی Base64 برای کل محتوای واکشی شده در تابع run().
+# تغییر جدید: اگر detect_cloudflare فعال باشد، فقط کانفیگ‌های Cloudflare در فایل خروجی ذخیره می‌شوند.
 
 import base64    # برای کدگذاری و رمزگشایی Base64
 import os        # برای کار با مسیرها و سیستم فایل
@@ -276,7 +277,8 @@ def run():
                     current_lines = [line for line in current_lines if any(line.lower().startswith(f"{t}://") for t in types)]
                     print(f"  تعداد خطوط پس از فیلتر نوع از این URL: {len(current_lines)}")
 
-                # شناسایی کانفیگ‌های Cloudflare فقط در صورت فعال بودن detect_cloudflare_for_url
+                # شناسایی کانفیگ‌های Cloudflare
+                cloudflare_configs = []
                 if detect_cloudflare_for_url:
                     cloudflare_configs = identify_cloudflare_domains(current_lines)
                     if cloudflare_configs:
@@ -292,12 +294,19 @@ def run():
 
                 shuffle_array(current_lines) # به‌هم‌ریختن خطوط این URL
 
-                # انتخاب تعداد مشخصی از خطوط (یا نامحدود)
-                if current_count_per_url == 0:
-                    selected_lines = current_lines
+                # *** تغییر جدید: انتخاب خطوط برای ذخیره بر اساس detect_cloudflare_for_url ***
+                if detect_cloudflare_for_url:
+                    # اگر شناسایی Cloudflare فعال است، فقط کانفیگ‌های Cloudflare را ذخیره کن
+                    selected_lines = cloudflare_configs
+                    print(f"  تعداد {len(selected_lines)} خط Cloudflare برای این URL انتخاب شد.")
                 else:
-                    selected_lines = current_lines[:current_count_per_url]
-                print(f"  تعداد {len(selected_lines)} خط برای این URL انتخاب شد.")
+                    # در غیر این صورت، خطوط فیلتر شده بر اساس نوع و تعداد را ذخیره کن
+                    if current_count_per_url == 0:
+                        selected_lines = current_lines
+                    else:
+                        selected_lines = current_lines[:current_count_per_url]
+                    print(f"  تعداد {len(selected_lines)} خط برای این URL انتخاب شد.")
+
 
                 # اتصال خطوط انتخاب شده و کدگذاری نهایی به Base64
                 final_text = "\r\n".join(selected_lines)
