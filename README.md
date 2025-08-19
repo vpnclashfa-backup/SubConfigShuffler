@@ -26,3 +26,4 @@ This README lists the generated subscription configuration files.
 - [mahsanet_mci3_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/mahsanet_mci3_cloudflare.txt)
 - [mahsanet_mtn2_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/mahsanet_mtn2_cloudflare.txt)
 - [mahsanet_mtn3_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/mahsanet_mtn3_cloudflare.txt)
+- [MahsaNetConfigTopic](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/MahsaNetConfigTopic.txt)
