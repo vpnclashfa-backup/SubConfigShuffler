@@ -69,6 +69,7 @@ https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/s
 https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_2.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mtn2_cloudflare.txt
 https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_3.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mtn3_cloudflare.txt
 https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_4.txt,detect_cloudflare=true,count_per_url=0,output_file_name=mahsanet_mtn4_cloudflare.txt
+https://raw.githubusercontent.com/MahsaNetConfigTopic/config/refs/heads/main/xray_final.txt,count_per_url=0,output_file_name=MahsaNetConfigTopic.txt
 
 # پروتکل‌های دیگر که به صورت پیش‌فرض غیرفعال هستند، اما می‌توانید آن‌ها را فعال کنید:
 # Warp
