@@ -17,6 +17,7 @@ This README lists the generated subscription configuration files.
 - [10ium_V2ray_Config_All_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/10ium_V2ray_Config_All_cloudflare.txt)
 - [10ium_telegram_configs_collector_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/10ium_telegram_configs_collector_cloudflare.txt)
 - [10ium_V2Hub_merged_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/10ium_V2Hub_merged_cloudflare.txt)
+- [10ium_fetcher_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/10ium_fetcher_cloudflare.txt)
 - [10ium_V2ray_HiNVPN_mix_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/10ium_V2ray_HiNVPN_mix_cloudflare.txt)
 - [10ium_CollectorLite_Config_mixed_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/10ium_CollectorLite_Config_mixed_cloudflare.txt)
 - [10ium_Collector_mixed_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/10ium_Collector_mixed_cloudflare.txt)
