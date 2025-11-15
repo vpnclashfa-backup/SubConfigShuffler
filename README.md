@@ -8,6 +8,7 @@ This README lists the generated subscription configuration files.
 - [maimengmeng_AnyTLS](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/maimengmeng_AnyTLS.txt)
 - [maimengmeng_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/maimengmeng_cloudflare.txt)
 - [roosterkid_v2ray](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/roosterkid_v2ray.txt)
+- [roosterkid_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/roosterkid_cloudflare.txt)
 - [rayan_proxy](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/rayan_proxy.txt)
 - [Rayan-Config_CSub_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/Rayan-Config_CSub_cloudflare.txt)
 - [10ium_V2ray_Config_ss_cloudflare](https://raw.githubusercontent.com/vpnclashfa-backup/SubConfigShuffler/main/shuffled_outputs/10ium_V2ray_Config_ss_cloudflare.txt)
